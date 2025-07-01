@@ -450,7 +450,8 @@ export default function OtpVerification({ onVerify }) {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/user/verify-otp", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/user/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp: fullOtp }),
@@ -472,13 +473,14 @@ export default function OtpVerification({ onVerify }) {
     if (isResending || resendTimer > 0) return;
     try {
       setIsResending(true);
-      const res = await fetch("http://localhost:3000/api/user/send-otp", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res2 = await fetch(`${API_URL}/api/user/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, type: "accountVerification" }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      const data = await res2.json();
+      if (!res2.ok) throw new Error(data.message);
       setSuccessMessage("OTP resent successfully.");
       setResendTimer(30);
     } catch (err) {

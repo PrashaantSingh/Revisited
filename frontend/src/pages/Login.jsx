@@ -98,6 +98,7 @@ const Login = ({ setUser }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -108,7 +109,7 @@ const Login = ({ setUser }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:3000/api/user/signin", {
+      const res = await fetch(`${API_URL}/api/user/signin`, {
         method: "POST",
         headers: {
           "Content-type": "application/json",

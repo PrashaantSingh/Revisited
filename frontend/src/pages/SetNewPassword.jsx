@@ -22,7 +22,8 @@ export default function SetNewPassword() {
   }, []);
 
   async function onSetPassword(userEmail) {
-    const res = await fetch("http://localhost:3000/api/user/reset-password", {
+    const API_URL = import.meta.env.VITE_API_URL;
+    const res = await fetch(`${API_URL}/api/user/reset-password`, {
       method: "POST",
       headers: {
         "Content-type": "application/json",

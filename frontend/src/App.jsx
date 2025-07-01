@@ -25,7 +25,8 @@ function App() {
       if (!token) return;
       try {
         setIsLoading(true);
-        const res = await fetch("http://localhost:3000/api/user/me", {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/api/user/me`, {
           method: "GET",
           headers: {
             "Content-type": "application/json",

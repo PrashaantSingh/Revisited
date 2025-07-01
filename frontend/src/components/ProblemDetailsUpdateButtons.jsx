@@ -1,12 +1,22 @@
 import { useState } from "react";
 import { MdDelete } from "react-icons/md";
 
-export default function ProblemDetailsUpdateButtons({editFields,setQuestion,setIsEditing,setError,setLastRevisedAt,setIsDeleting,isEditing,id}) {
-    const [visited, setVisited] = useState(false);
-    
+export default function ProblemDetailsUpdateButtons({
+  editFields,
+  setQuestion,
+  setIsEditing,
+  setError,
+  setLastRevisedAt,
+  setIsDeleting,
+  isEditing,
+  id,
+}) {
+  const [visited, setVisited] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL;
+
   async function handleSaveEdit() {
     try {
-      const res = await fetch(`http://localhost:3000/api/questions/${id}`, {
+      const res = await fetch(`${API_URL}/api/questions/${id}`, {
         method: "PATCH",
         headers: {
           "Content-type": "application/json",
@@ -23,34 +33,33 @@ export default function ProblemDetailsUpdateButtons({editFields,setQuestion,setI
     }
   }
 
+  async function handleVisited(id) {
+    setVisited(true);
+    try {
+      const res = await fetch(`${API_URL}/api/questions/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: localStorage.getItem("token"),
+        },
+        body: JSON.stringify({ lastRevisedAt: new Date().toISOString() }),
+      });
 
-      async function handleVisited(id) {
-        setVisited(true);
-        try {
-          const res = await fetch(`http://localhost:3000/api/questions/${id}`, {
-            method: "PATCH",
-            headers: {
-              "Content-type": "application/json",
-              Authorization: localStorage.getItem("token"),
-            },
-            body: JSON.stringify({ lastRevisedAt: new Date().toISOString() }),
-          });
-    
-          const data = await res.json();
-          const lastRevised = new Date(
-            data.question.lastRevisedAt
-          ).toLocaleDateString("en-IN", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          });
-          setLastRevisedAt(lastRevised);
-        } catch (error) {
-          console.error(error?.message || "Couldn't marked visited");
-        } finally {
-          setTimeout(() => setVisited(false), 1500);
-        }
-      }
+      const data = await res.json();
+      const lastRevised = new Date(
+        data.question.lastRevisedAt
+      ).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      setLastRevisedAt(lastRevised);
+    } catch (error) {
+      console.error(error?.message || "Couldn't marked visited");
+    } finally {
+      setTimeout(() => setVisited(false), 1500);
+    }
+  }
   return (
     <>
       <div className="self-center flex gap-2">

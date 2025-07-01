@@ -10,16 +10,14 @@ export default function ForgotPassword() {
   const navigate = useNavigate();
 
   async function onRequestReset(userEmail) {
-    const res = await fetch(
-      "http://localhost:3000/api/user/request-password-reset",
-      {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({ userEmail }),
-      }
-    );
+    const API_URL = import.meta.env.VITE_API_URL;
+    const res = await fetch(`${API_URL}/api/user/request-password-reset`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({ userEmail }),
+    });
     const data = await res.json();
 
     if (!res.ok) {

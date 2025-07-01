@@ -12,7 +12,7 @@ const AddQuestionForm = () => {
     notes: "",
     tags: "",
     link: "",
-    difficulty: "easy", 
+    difficulty: "easy",
   });
 
   const handleChange = (e) => {
@@ -34,7 +34,8 @@ const AddQuestionForm = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:3000/api/questions/add", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/questions/add`, {
         method: "POST",
         headers: {
           "Content-type": "application/json",

@@ -94,14 +94,12 @@ export default function ResetOtpVerification() {
     setError("");
 
     try {
-      const res = await fetch(
-        "http://localhost:3000/api/user/verify-password-reset-otp",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userEmail, otp: fullOtp }),
-        }
-      );
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res = await fetch(`${API_URL}/api/user/verify-password-reset-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userEmail, otp: fullOtp }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setSuccessMessage("OTP Verified Successfully!");
@@ -120,13 +118,14 @@ export default function ResetOtpVerification() {
     if (isResending || resendTimer > 0) return;
     try {
       setIsResending(true);
-      const res = await fetch("http://localhost:3000/api/user/send-otp", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const res2 = await fetch(`${API_URL}/api/user/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: userEmail, type: "passwordReset" }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      const data = await res2.json();
+      if (!res2.ok) throw new Error(data.message);
       setSuccessMessage("OTP resent successfully.");
       setResendTimer(30);
     } catch (err) {

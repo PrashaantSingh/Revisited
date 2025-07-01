@@ -8,6 +8,7 @@ export default function QuestionList() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   function handleClick(e, id) {
     navigate(`/questions/${id}`);
@@ -16,7 +17,7 @@ export default function QuestionList() {
   useEffect(() => {
     async function getQuestions() {
       try {
-        const res = await fetch("http://localhost:3000/api/questions", {
+        const res = await fetch(`${API_URL}/api/questions`, {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
@@ -31,7 +32,7 @@ export default function QuestionList() {
     }
 
     getQuestions();
-  }, []);
+  }, [API_URL]);
 
   const filteredQuestions =
     searchTerm.trim() === ""

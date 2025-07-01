@@ -35,10 +35,12 @@ export default function QuestionDetails() {
     link: "",
   });
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     async function fetchQuestion() {
       try {
-        const res = await fetch(`http://localhost:3000/api/questions/${id}`, {
+        const res = await fetch(`${API_URL}/api/questions/${id}`, {
           headers: {
             "Content-type": "application/json",
             Authorization: localStorage.getItem("token"),
@@ -61,7 +63,7 @@ export default function QuestionDetails() {
       }
     }
     fetchQuestion();
-  }, [id]);
+  }, [id, API_URL]);
 
   useEffect(() => {
     if (question) {
@@ -79,7 +81,7 @@ export default function QuestionDetails() {
   }, [question]);
 
   async function handleDelete(id) {
-    const res = await fetch(`http://localhost:3000/api/questions/${id}`, {
+    const res = await fetch(`${API_URL}/api/questions/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: localStorage.getItem("token"),
