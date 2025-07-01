@@ -8,6 +8,12 @@ import helmet from "helmet";
 
 dotenv.config();
 const app = express();
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "https://revizited.netlify.app",
+    credentials: true,
+  })
+);
 
 // app.use(
 //   cors({
@@ -39,12 +45,6 @@ const app = express();
 
 app.use(helmet());
 app.use(express.json());
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "https://revizited.netlify.app",
-    credentials: true,
-  })
-);
 
 app.use("/api/user", authRouter);
 app.use("/api/questions", questionRouter);
