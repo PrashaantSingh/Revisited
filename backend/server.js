@@ -8,19 +8,22 @@ import helmet from "helmet";
 
 dotenv.config();
 const app = express();
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "https://revizited.netlify.app",
-    credentials: true,
-  })
-);
-
 // app.use(
 //   cors({
-//     origin: true,
+//     origin:
+//       "http://localhost:5174" ||
+//       process.env.CLIENT_URL ||
+//       "https://revizited.netlify.app",
 //     credentials: true,
 //   })
 // );
+
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 // const allowedOrigins = [
 //   "https://revizited.netlify.app",
 //   "http://localhost:5173",
