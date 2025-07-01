@@ -7,14 +7,13 @@ import cors from "cors";
 import helmet from "helmet";
 import xss from "xss-clean";
 dotenv.config();
-
 const app = express();
 app.use(helmet());
 app.use(xss());
 app.use(express.json());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "https://revizited.netlify.app/",
+    origin: process.env.CLIENT_URL || "https://revizited.netlify.app",
     credentials: true,
   })
 );

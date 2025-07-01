@@ -25,7 +25,7 @@ const transporter = nodemailer.createTransport({
 
 export async function sendOtpEmail(email, otp, subject, purpose) {
   const mailOptions = {
-    from: `REVISITED <${process.env.SMTP_MAIL}`,
+    from: `REVISITED <${process.env.SMTP_MAIL}>`,
     to: email,
     subject: subject,
     html: {
