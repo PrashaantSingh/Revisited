@@ -5,33 +5,39 @@ import questionRouter from "./routes/questionRouter.js";
 import connectDB from "./database/db.js";
 import cors from "cors";
 import helmet from "helmet";
-import xss from "xss-clean";
+
 dotenv.config();
 const app = express();
-const allowedOrigins = [
-  "https://revizited.netlify.app",
-  "http://localhost:5173",
-  "http://localhost:5174",
-];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.error("Blocked by CORS:", origin);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+// const allowedOrigins = [
+//   "https://revizited.netlify.app",
+//   "http://localhost:5173",
+//   "http://localhost:5174",
+// ];
+
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         console.error("Blocked by CORS:", origin);
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
 
 app.use(helmet());
-app.use(xss());
 app.use(express.json());
 // app.use(
 //   cors({
