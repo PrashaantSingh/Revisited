@@ -1,93 +1,3 @@
-// import { useState } from "react";
-// import Header from "../components/Header";
-// import { useNavigate } from "react-router";
-
-// const Login = ({ setUser, error, setError }) => {
-//   const [form, setForm] = useState({ email: "", password: "" });
-//   const navigate = useNavigate();
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setForm((prev) => ({ ...prev, [name]: value }));
-//     setError("");
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const res = await fetch("http://localhost:3000/api/user/signin", {
-//         method: "POST",
-//         headers: {
-//           "Content-type": "application/json",
-//         },
-//         body: JSON.stringify(form),
-//       });
-//       const data = await res.json();
-//       if (!res.ok) {
-//         throw new Error(data.message);
-//       }
-//       localStorage.setItem("token", `Bearer ${data.token}`);
-//       setUser(data.user);
-//       navigate("/");
-//       console.log("data:", data.user);
-//     } catch (error) {
-//       setError(error.message);
-//       console.error(error.message);
-//     }
-//   };
-
-//   return (
-//     <div className="h-screen">
-//       <Header noSearch={true} noSignin={true} />
-//       <div className="w-[90%] mx-auto my-4">
-//         <div className="min-h-screen flex items-center justify-center bg-gray-100 bg-dark text-white">
-//           <form
-//             onSubmit={handleSubmit}
-//             className="p-8 rounded-lg shadow-md w-full max-w-md bg-light-dark"
-//           >
-//             <h2 className="text-2xl font-semibold text-center mb-6 text-white">
-//               Login
-//             </h2>
-
-//             <label className="block mb-2 text-sm font-medium">Email</label>
-//             <input
-//               type="email"
-//               name="email"
-//               value={form.email}
-//               onChange={handleChange}
-//               required
-//               className="w-full mb-4 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200"
-//             />
-
-//             <label className="block mb-2 text-sm font-medium">Password</label>
-//             <input
-//               type="password"
-//               name="password"
-//               value={form.password}
-//               onChange={handleChange}
-//               required
-//               className="w-full mb-6 p-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-200"
-//             />
-//             <p
-//               className={`text-xs h-4 mt-2 ${
-//                 error ? "text-red-500 visible" : "invisible"
-//               }`}
-//             >
-//               {error || "placeholder"}
-//             </p>
-//             <button
-//               type="submit"
-//               className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md mt-2"
-//             >
-//               Login
-//             </button>
-//           </form>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Login;
 import { useState } from "react";
 import Header from "../components/Header";
 import { useNavigate } from "react-router";
@@ -111,6 +21,7 @@ const Login = ({ setUser }) => {
     try {
       const res = await fetch(`${API_URL}/api/user/signin`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-type": "application/json",
         },

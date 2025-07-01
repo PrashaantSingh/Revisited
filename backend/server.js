@@ -11,12 +11,37 @@ const app = express();
 app.use(helmet());
 app.use(xss());
 app.use(express.json());
+// app.use(
+//   cors({
+//     origin: process.env.CLIENT_URL || "https://revizited.netlify.app",
+//     credentials: true,
+//   })
+// );
+
+const allowedOrigins = [
+  "https://revizited.netlify.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "https://revizited.netlify.app",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error("Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+app.options("*", cors());
+
 app.use("/api/user", authRouter);
 app.use("/api/questions", questionRouter);
 connectDB();
