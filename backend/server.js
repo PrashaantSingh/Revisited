@@ -40,7 +40,6 @@ app.use(
   })
 );
 
-app.options("*", cors());
 
 app.use("/api/user", authRouter);
 app.use("/api/questions", questionRouter);
