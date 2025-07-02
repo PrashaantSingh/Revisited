@@ -99,7 +99,7 @@ const Login = ({ setUser }) => {
           <div className="flex justify-start mt-2">
             <button
               type="button"
-              className="text-blue-400 text-xs hover:underline focus:outline-none px-2 py-1"
+              className="text-blue-400 text-xs hover:underline focus:outline-none px-2 py-1 cursor-pointer"
               onClick={() => navigate("/forgot-password")}
             >
               Forgot password?
@@ -116,7 +116,7 @@ const Login = ({ setUser }) => {
 
           <button
             type="submit"
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md mt-4"
+            className="cursor-pointer w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md mt-4"
           >
             Login
           </button>

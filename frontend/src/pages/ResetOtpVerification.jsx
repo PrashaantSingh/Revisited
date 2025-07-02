@@ -195,7 +195,7 @@ export default function ResetOtpVerification() {
                 type="button"
                 onClick={handleResendOtp}
                 disabled={isResending}
-                className="text-amber-400 hover:underline"
+                className="cursor-pointer text-amber-400 hover:underline"
               >
                 {isResending ? "Sending..." : "Resend OTP"}
               </button>
@@ -205,7 +205,7 @@ export default function ResetOtpVerification() {
           <button
             type="submit"
             disabled={isVerifying}
-            className={`w-full py-2 rounded text-white text-sm font-semibold ${
+            className={`cursor-pointer w-full py-2 rounded text-white text-sm font-semibold ${
               isVerifying
                 ? "bg-gray-600 cursor-not-allowed"
                 : "bg-amber-600 hover:bg-amber-700"
