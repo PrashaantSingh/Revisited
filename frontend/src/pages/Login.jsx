@@ -7,6 +7,7 @@ const Login = ({ setUser }) => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -18,6 +19,7 @@ const Login = ({ setUser }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/user/signin`, {
         method: "POST",
@@ -36,6 +38,7 @@ const Login = ({ setUser }) => {
         ) {
           setError("");
           navigate("/user/verification", { state: { email: form.email } });
+          setIsLoading(false);
           return;
         }
         throw new Error(data.message);
@@ -45,6 +48,8 @@ const Login = ({ setUser }) => {
       navigate("/");
     } catch (error) {
       setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -116,9 +121,12 @@ const Login = ({ setUser }) => {
 
           <button
             type="submit"
-            className="cursor-pointer w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md mt-4"
+            disabled={isLoading}
+            className={`cursor-pointer w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md mt-4 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>

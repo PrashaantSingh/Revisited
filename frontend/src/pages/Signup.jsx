@@ -14,6 +14,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -25,6 +26,7 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     const userData = {
       name: form.name.trim(),
       email: form.email.trim(),
@@ -54,6 +56,8 @@ const Signup = () => {
     } catch (error) {
       setError(error.message);
       console.error(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -158,9 +162,12 @@ const Signup = () => {
 
           <button
             type="submit"
-            className="cursor-pointer w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md mt-2"
+            disabled={isLoading}
+            className={`cursor-pointer w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-md mt-2 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Create Account
+            {isLoading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
       </div>
