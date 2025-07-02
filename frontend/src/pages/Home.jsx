@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import QuestionList from "../components/QuestionList";
 import ConfirmationModal from "../components/ConfirmationModal";
 import { useNavigate } from "react-router";
-export default function Home({user,setUser,error,setError}) {
+export default function Home({user,setUser,error,setError,questions,setQuestions}) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate=useNavigate()
   const handleLogout = () => {
@@ -32,7 +32,7 @@ export default function Home({user,setUser,error,setError}) {
         user={user}
         setIsLoggingOut={setIsLoggingOut}
       />
-      <QuestionList />
+      <QuestionList questions={questions} setQuestions={setQuestions}/>
     </div>
   );
 }

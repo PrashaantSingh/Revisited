@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MdDelete } from "react-icons/md";
+import formatDate from "../utilities/formatDate";
 
 export default function ProblemDetailsUpdateButtons({
   editFields,
@@ -7,59 +8,100 @@ export default function ProblemDetailsUpdateButtons({
   setIsEditing,
   setError,
   setLastRevisedAt,
-  setIsDeleting,
+  lastRevisedAt,
   isEditing,
   id,
+  setOverlayDisplaying,
+  setQuestions,
+  questions,
 }) {
   const [visited, setVisited] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
 
   async function handleSaveEdit() {
+    const previousQuestion = questions.find((ques) => ques._id === id);
+
+    const updatedQuestion = { ...previousQuestion, ...editFields };
+
+    setQuestions((prev) =>
+      prev.map((ques) => (ques._id === id ? updatedQuestion : ques))
+    );
+    setQuestion(updatedQuestion);
+    setIsEditing(false);
+
     try {
       const res = await fetch(`${API_URL}/api/questions/${id}`, {
         method: "PATCH",
         headers: {
-          "Content-type": "application/json",
+          "Content-Type": "application/json",
           Authorization: localStorage.getItem("token"),
         },
         body: JSON.stringify(editFields),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      setQuestion(data.question);
-      setIsEditing(false);
     } catch (err) {
+      setQuestions((prev) =>
+        prev.map((ques) => (ques._id === id ? previousQuestion : ques))
+      );
+      setQuestion(previousQuestion);
       setError(err.message);
+    } finally {
+      setIsEditing(false);
     }
   }
 
   async function handleVisited(id) {
     setVisited(true);
+    const prevRevisedAt = lastRevisedAt;
+    const newRevisedAt = new Date().toISOString();
+
+    setLastRevisedAt(formatDate(newRevisedAt));
+
     try {
       const res = await fetch(`${API_URL}/api/questions/${id}`, {
         method: "PATCH",
         headers: {
-          "Content-type": "application/json",
+          "Content-Type": "application/json",
           Authorization: localStorage.getItem("token"),
         },
-        body: JSON.stringify({ lastRevisedAt: new Date().toISOString() }),
+        body: JSON.stringify({ lastRevisedAt: newRevisedAt }),
       });
 
       const data = await res.json();
-      const lastRevised = new Date(
-        data.question.lastRevisedAt
-      ).toLocaleDateString("en-IN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-      setLastRevisedAt(lastRevised);
-    } catch (error) {
-      console.error(error?.message || "Couldn't marked visited");
+      if (!res.ok) throw new Error(data.message);
+    } catch (err) {
+      setLastRevisedAt(prevRevisedAt);
+      console.error(err.message);
     } finally {
-      setTimeout(() => setVisited(false), 1500);
+      setVisited(false);
     }
   }
+
+  // async function handleVisited(id) {
+  //   setVisited(true);
+  //   try {
+  //     const res = await fetch(`${API_URL}/api/questions/${id}`, {
+  //       method: "PATCH",
+  //       headers: {
+  //         "Content-type": "application/json",
+  //         Authorization: localStorage.getItem("token"),
+  //       },
+  //       body: JSON.stringify({ lastRevisedAt: new Date().toISOString() }),
+  //     });
+
+  //     const data = await res.json();
+
+  //     const lastRevised = formatDate(data.question.lastRevisedAt);
+  //     setLastRevisedAt(lastRevised);
+  //   } catch (error) {
+  //     console.error(error?.message || "Couldn't marked visited");
+  //   } finally {
+  //     setTimeout(() => setVisited(false), 1500);
+  //   }
+  // }
+
   return (
     <>
       <div className="self-center flex gap-2">
@@ -85,7 +127,7 @@ export default function ProblemDetailsUpdateButtons({
             </button>
             <MdDelete
               className="text-2xl text-red-500 cursor-pointer"
-              onClick={() => setIsDeleting(true)}
+              onClick={() => setOverlayDisplaying(true)}
             />
           </div>
         ) : (

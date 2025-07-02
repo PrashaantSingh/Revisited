@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
+import { useLocation } from "react-router-dom";
 import BackBtn from "../components/BackBtn";
 import { useNavigate } from "react-router-dom";
 import ConfirmationModal from "../components/ConfirmationModal";
@@ -14,13 +14,19 @@ import ProblemDifficulty from "../components/ProblemDifficulty";
 import ProblemTitle from "../components/ProblemTitle";
 import LastRevisedAt from "../components/LastRevisedAt";
 import ProblemDetailsUpdateButtons from "../components/ProblemDetailsUpdateButtons";
+import formatDate from "../utilities/formatDate";
 
-export default function QuestionDetails() {
+export default function QuestionDetails({ setQuestions, questions }) {
+  const location = useLocation();
+  const ques = location?.state?.question;
   const { id } = useParams();
-  const [question, setQuestion] = useState(null);
+  const [question, setQuestion] = useState(ques || null);
   const [error, setError] = useState("");
-  const [lastRevisedAt, setLastRevisedAt] = useState(question?.lastRevisedAt);
+  const [lastRevisedAt, setLastRevisedAt] = useState(
+    formatDate(question?.lastRevisedAt || "")
+  );
   const [isDeleting, setIsDeleting] = useState(false);
+  const [overayDisplaying, setOverlayDisplaying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
@@ -39,6 +45,7 @@ export default function QuestionDetails() {
 
   useEffect(() => {
     async function fetchQuestion() {
+      if (question) return;
       try {
         const res = await fetch(`${API_URL}/api/questions/${id}`, {
           headers: {
@@ -80,18 +87,25 @@ export default function QuestionDetails() {
     }
   }, [question]);
 
-  async function handleDelete(id) {
-    const res = await fetch(`${API_URL}/api/questions/${id}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: localStorage.getItem("token"),
-      },
-    });
-    const data = await res.json();
-    if (data.success) {
-      navigate("/");
-    } else {
-      throw new Error("could not delete!");
+  async function handleDelete(e, id) {
+    try {
+      setIsDeleting(true);
+      e.target.innerText = "Deleting..";
+      const res = await fetch(`${API_URL}/api/questions/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setQuestions((prev) => prev.filter((ques) => ques._id !== id));
+        navigate("/");
+      } else throw new Error("could not delete!");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -105,11 +119,13 @@ export default function QuestionDetails() {
 
   return (
     <div>
-      {isDeleting && (
+      {overayDisplaying && (
         <ConfirmationModal
           text={"Do you want to delete this question?"}
-          onConfirm={() => handleDelete(question._id)}
-          onCancel={() => setIsDeleting(false)}
+          onConfirm={(e) => handleDelete(e, question._id)}
+          onCancel={() => setOverlayDisplaying(false)}
+          operation="DELETE"
+          isOperationPerforming={isDeleting}
         />
       )}
       <div>
@@ -135,9 +151,12 @@ export default function QuestionDetails() {
               setIsEditing={setIsEditing}
               setError={setError}
               setLastRevisedAt={setLastRevisedAt}
-              setIsDeleting={setIsDeleting}
+              lastRevisedAt={lastRevisedAt}
+              setOverlayDisplaying={setOverlayDisplaying}
               isEditing={isEditing}
               id={id}
+              questions={questions}
+              setQuestions={setQuestions}
             />
           </div>
 

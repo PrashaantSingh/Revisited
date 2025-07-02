@@ -3,19 +3,20 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import QuestionTitle from "./QuestionTitle";
 
-export default function QuestionList() {
-  const [questions, setQuestions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+export default function QuestionList({ questions, setQuestions }) {
+  const [isQuestionLoading, setIsQuestionLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
   function handleClick(e, id) {
-    navigate(`/questions/${id}`);
+    navigate(`/questions/${id}`,{state:{question:questions.find(ques=>ques._id===id)}});
   }
 
   useEffect(() => {
     async function getQuestions() {
+      if (questions && questions.length > 0) return;
+      setIsQuestionLoading(true);
       try {
         const res = await fetch(`${API_URL}/api/questions`, {
           headers: {
@@ -27,7 +28,7 @@ export default function QuestionList() {
       } catch (error) {
         console.error("Failed to fetch questions:", error);
       } finally {
-        setIsLoading(false);
+        setIsQuestionLoading(false);
       }
     }
 
@@ -43,7 +44,7 @@ export default function QuestionList() {
 
   return (
     <div className="mt-6 w-[90%] mx-auto my-4 mb-2">
-      {isLoading ? (
+      {isQuestionLoading ? (
         <h2 className="text-white text-center text-xl">Loading questions...</h2>
       ) : questions.length === 0 ? (
         <h2 className="text-white font-semibold text-3xl text-center">

@@ -17,6 +17,8 @@ function App() {
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [questions, setQuestions] = useState([]);
+
   const navigate = useNavigate();
   useEffect(() => {
     async function getUser() {
@@ -61,6 +63,8 @@ function App() {
                   error={error}
                   setError={setError}
                   setUser={setUser}
+                  questions={questions}
+                  setQuestions={setQuestions}
                 />
               ) : (
                 <Navigate to="/login" />
@@ -72,9 +76,25 @@ function App() {
             element={!user ? <Login setUser={setUser} /> : <Navigate to="/" />}
           />
           <Route path="/signup" element={<Signup setUser={setUser} />} />
-          <Route path="/addQuestionsForm" element={<AddQuestionForm />} />
+          <Route
+            path="/addQuestionsForm"
+            element={
+              <AddQuestionForm
+                setQuestions={setQuestions}
+                questions={questions}
+              />
+            }
+          />
 
-          <Route path="/questions/:id" element={<QuestionDetails />} />
+          <Route
+            path="/questions/:id"
+            element={
+              <QuestionDetails
+                setQuestions={setQuestions}
+                questions={questions}
+              />
+            }
+          />
           <Route
             path="/user/verification"
             element={

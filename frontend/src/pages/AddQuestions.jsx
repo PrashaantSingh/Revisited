@@ -2,8 +2,9 @@ import { useState } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router";
 
-const AddQuestionForm = () => {
+const AddQuestionForm = ({ questions, setQuestions }) => {
   const navigate = useNavigate();
+  const [isAdding, setIsAdding] = useState(false);
   const [form, setForm] = useState({
     title: "",
     problemStatement: "",
@@ -24,6 +25,7 @@ const AddQuestionForm = () => {
     navigate("/");
   };
   const handleSubmit = async (e) => {
+    setIsAdding(true);
     e.preventDefault();
 
     const questionData = {
@@ -46,6 +48,7 @@ const AddQuestionForm = () => {
 
       const data = await res.json();
       if (data.success) {
+        setQuestions((prev) => [...prev, data.question]);
         navigate("/");
       }
       console.log();
@@ -57,10 +60,12 @@ const AddQuestionForm = () => {
         notes: "",
         tags: "",
         link: "",
-        difficulty: "easy", // reset to default value
+        difficulty: "easy",
       });
     } catch (error) {
       console.error("Error adding question:", error);
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -181,9 +186,10 @@ const AddQuestionForm = () => {
           <div>
             <button
               type="submit"
-              className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-md shadow"
+              disabled={isAdding}
+              className={`bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-md shadow`}
             >
-              Add Question
+              {isAdding ? "Adding.." : "Add Question"}
             </button>
           </div>
         </form>
