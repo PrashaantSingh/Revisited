@@ -3,7 +3,6 @@ import { PiBrainBold } from "react-icons/pi";
 export default function QuestionTitle({ question, clickHandler }) {
   const { title, difficulty, link, lastRevisedAt } = question;
   const daysAgo = getDaysAgo(lastRevisedAt);
-
   const colorClass =
     {
       hard: "text-red-500",
@@ -13,10 +12,14 @@ export default function QuestionTitle({ question, clickHandler }) {
 
   return (
     <div
-      onClick={clickHandler}
-      className={`flex justify-between bg-light-dark py-2 px-3 mb-3 rounded-md cursor-pointer text-white`}
+      onClick={question.isTemp ? null : clickHandler}
+      className={`flex justify-between bg-light-dark py-2 px-3 mb-3 rounded-md text-white transition-opacity duration-300 ${
+        question.isTemp
+          ? "opacity-80 pointer-events-none cursor-default grayscale"
+          : "opacity-100 pointer-events-auto cursor-pointer"
+      }`}
     >
-      <div className="flex items-center gap-2">
+      <div className={`flex items-center gap-2`}>
         <div>{title}</div>
         <a href={link} target="_blank" onClick={(e) => e.stopPropagation()}>
           <BiLink
@@ -51,8 +54,8 @@ function getDaysAgo(dateString) {
   const now = new Date();
   const revisedDate = new Date(dateString);
 
-  const timeDiff = now - revisedDate; 
-  const daysAgo = Math.floor(timeDiff / (1000 * 60 * 60 * 24)); 
+  const timeDiff = now - revisedDate;
+  const daysAgo = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 
   return daysAgo;
 }

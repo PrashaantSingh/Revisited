@@ -3,7 +3,7 @@ export default function ProblemLink({ isEditing, editFields,setEditFields }) {
     <>
       {isEditing ? (
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Problem Link</h2>
+          <h2 className="text-lg font-semibold mb-2">Problem Link</h2>
           <input
             className="bg-light-dark text-amber-100 p-2 rounded w-full"
             type="link"

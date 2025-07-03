@@ -24,9 +24,56 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
   const handleBack = () => {
     navigate("/");
   };
+  // const handleSubmit = async (e) => {
+  //   setIsAdding(true);
+  //   e.preventDefault();
+
+  //   const questionData = {
+  //     ...form,
+  //     tags: form.tags.split(",").map((tag) => tag.trim()),
+  //     createdAt: new Date(),
+  //     lastRevisedAt: new Date(),
+  //   };
+
+  //   try {
+  //     const API_URL = import.meta.env.VITE_API_URL;
+  //     const res = await fetch(`${API_URL}/api/questions/add`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-type": "application/json",
+  //         Authorization: localStorage.getItem("token"),
+  //       },
+  //       body: JSON.stringify(questionData),
+  //     });
+
+  //     const data = await res.json();
+  //     if (data.success) {
+  //       setQuestions((prev) => [...prev, data.question]);
+  //       navigate("/");
+  //     }
+  //     console.log();
+  //     setForm({
+  //       title: "",
+  //       problemStatement: "",
+  //       code: "",
+  //       algorithm: "",
+  //       notes: "",
+  //       tags: "",
+  //       link: "",
+  //       difficulty: "easy",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error adding question:", error);
+  //   } finally {
+  //     setIsAdding(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
-    setIsAdding(true);
     e.preventDefault();
+    setIsAdding(true);
+
+    const tempId = `temp-${Date.now()}`;
 
     const questionData = {
       ...form,
@@ -34,6 +81,9 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
       createdAt: new Date(),
       lastRevisedAt: new Date(),
     };
+    const tempQuestion = { ...questionData, _id: tempId, isTemp: true };
+    setQuestions((prev) => [...prev, tempQuestion]);
+    navigate("/");
 
     try {
       const API_URL = import.meta.env.VITE_API_URL;
@@ -48,10 +98,19 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
 
       const data = await res.json();
       if (data.success) {
-        setQuestions((prev) => [...prev, data.question]);
-        navigate("/");
+        setQuestions((prev) =>
+          prev.map((q) => (q._id === tempId ? data.question : q))
+        );
+      } else {
+        throw new Error("Could not add question");
       }
-      console.log();
+    } catch (error) {
+      console.error("Error adding question:", error);
+      setQuestions((prev) => prev.filter((q) => q._id !== tempId));
+      alert("Failed to add question. Try again.");
+    } finally {
+      setIsAdding(false);
+
       setForm({
         title: "",
         problemStatement: "",
@@ -62,16 +121,11 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
         link: "",
         difficulty: "easy",
       });
-    } catch (error) {
-      console.error("Error adding question:", error);
-    } finally {
-      setIsAdding(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-dark text-white flex flex-col">
-      {/* <Header /> */}
       <div className="w-[90%] text-amber-600 mx-auto text-3xl m-5">
         <IoMdArrowRoundBack
           className="cursor-pointer"

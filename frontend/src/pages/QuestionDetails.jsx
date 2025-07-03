@@ -87,27 +87,61 @@ export default function QuestionDetails({ setQuestions, questions }) {
     }
   }, [question]);
 
+
   async function handleDelete(e, id) {
+    const prevQuestions = [...questions];
+    setQuestions((prev) => prev.filter((ques) => ques._id !== id));
+    navigate("/");
+
     try {
       setIsDeleting(true);
       e.target.innerText = "Deleting..";
+
       const res = await fetch(`${API_URL}/api/questions/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: localStorage.getItem("token"),
         },
       });
+
       const data = await res.json();
-      if (data.success) {
-        setQuestions((prev) => prev.filter((ques) => ques._id !== id));
-        navigate("/");
-      } else throw new Error("could not delete!");
+
+      if (!data.success) {
+        throw new Error("Could not delete!");
+      }
+
+      // navigate("/");
     } catch (error) {
-      console.error(error);
+      console.error("Delete failed, restoring UI:", error);
+      setQuestions(prevQuestions);
+      alert("Failed to delete. Try again.");
     } finally {
       setIsDeleting(false);
     }
   }
+  
+
+  // async function handleDelete(e, id) {
+  //   try {
+  //     setIsDeleting(true);
+  //     e.target.innerText = "Deleting..";
+  //     const res = await fetch(`${API_URL}/api/questions/${id}`, {
+  //       method: "DELETE",
+  //       headers: {
+  //         Authorization: localStorage.getItem("token"),
+  //       },
+  //     });
+  //     const data = await res.json();
+  //     if (data.success) {
+  //       setQuestions((prev) => prev.filter((ques) => ques._id !== id));
+  //       navigate("/");
+  //     } else throw new Error("could not delete!");
+  //   } catch (error) {
+  //     console.error(error);
+  //   } finally {
+  //     setIsDeleting(false);
+  //   }
+  // }
 
   if (error) {
     return <p className="text-red-500 text-center mt-10">{error}</p>;
@@ -118,103 +152,194 @@ export default function QuestionDetails({ setQuestions, questions }) {
   }
 
   return (
-    <div>
-      {overayDisplaying && (
-        <ConfirmationModal
-          text={"Do you want to delete this question?"}
-          onConfirm={(e) => handleDelete(e, question._id)}
-          onCancel={() => setOverlayDisplaying(false)}
-          operation="DELETE"
-          isOperationPerforming={isDeleting}
-        />
-      )}
-      <div>
-        <BackBtn className="mt-10 ml-4" />
-        <div className="max-w-4xl mx-auto py-10 px-4 text-white">
-          <div className="mb-6 flex justify-between items-center">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex flex-col">
-                <ProblemTitle
-                  isEditing={isEditing}
-                  editFields={editFields}
-                  setEditFields={setEditFields}
-                  question={question}
-                />
+    <div className="flex justify-center items-start gap-4 px-4 py-10 text-white">
+      <BackBtn />
 
-                <LastRevisedAt lastRevisedAt={lastRevisedAt} />
-              </div>
-            </div>
+      <div className="max-w-4xl w-full px-4">
+        {overayDisplaying && (
+          <ConfirmationModal
+            text={"Do you want to delete this question?"}
+            onConfirm={(e) => handleDelete(e, question._id)}
+            onCancel={() => setOverlayDisplaying(false)}
+            operation="DELETE"
+            isOperationPerforming={isDeleting}
+          />
+        )}
 
-            <ProblemDetailsUpdateButtons
-              editFields={editFields}
-              setQuestion={setQuestion}
-              setIsEditing={setIsEditing}
-              setError={setError}
-              setLastRevisedAt={setLastRevisedAt}
-              lastRevisedAt={lastRevisedAt}
-              setOverlayDisplaying={setOverlayDisplaying}
-              isEditing={isEditing}
-              id={id}
-              questions={questions}
-              setQuestions={setQuestions}
-            />
-          </div>
-
-          {(question.tags || question.difficulty) && (
-            <div className="mb-10 flex items-center gap-10 ">
-              <ProblemDifficulty
-                isEditing={isEditing}
-                editFields={editFields}
-                setEditFields={setEditFields}
-                question={question}
-              />
-
-              <ProblemTag
-                isEditing={isEditing}
-                editFields={editFields}
-                setEditFields={setEditFields}
-                question={question}
-              />
-            </div>
-          )}
-
-          {
-            <ProblemStatement
+        <div className="mb-6 flex justify-between items-start">
+          <div className="flex flex-col gap-1">
+            <ProblemTitle
               isEditing={isEditing}
               editFields={editFields}
               setEditFields={setEditFields}
               question={question}
             />
-          }
+            <LastRevisedAt lastRevisedAt={lastRevisedAt} />
+          </div>
 
-          <ProblemLink
-            isEditing={isEditing}
+          <ProblemDetailsUpdateButtons
             editFields={editFields}
-            setEditFields={setEditFields}
-          />
-
-          <ProblemCode
+            setQuestion={setQuestion}
+            setIsEditing={setIsEditing}
+            setError={setError}
+            setLastRevisedAt={setLastRevisedAt}
+            lastRevisedAt={lastRevisedAt}
+            setOverlayDisplaying={setOverlayDisplaying}
             isEditing={isEditing}
-            editFields={editFields}
-            setEditFields={setEditFields}
-            question={question}
-          />
-
-          <ProblemAlgo
-            isEditing={isEditing}
-            editFields={editFields}
-            setEditFields={setEditFields}
-            question={question}
-          />
-
-          <ProblemNotes
-            isEditing={isEditing}
-            editFields={editFields}
-            setEditFields={setEditFields}
-            question={question}
+            id={id}
+            questions={questions}
+            setQuestions={setQuestions}
           />
         </div>
+
+        {(question.tags || question.difficulty) && (
+          <div className="mb-10 flex items-center gap-10">
+            <ProblemDifficulty
+              isEditing={isEditing}
+              editFields={editFields}
+              setEditFields={setEditFields}
+              question={question}
+            />
+            <ProblemTag
+              isEditing={isEditing}
+              editFields={editFields}
+              setEditFields={setEditFields}
+              question={question}
+            />
+          </div>
+        )}
+
+        <ProblemStatement
+          isEditing={isEditing}
+          editFields={editFields}
+          setEditFields={setEditFields}
+          question={question}
+        />
+        <ProblemLink
+          isEditing={isEditing}
+          editFields={editFields}
+          setEditFields={setEditFields}
+        />
+        <ProblemAlgo
+          isEditing={isEditing}
+          editFields={editFields}
+          setEditFields={setEditFields}
+          question={question}
+        />
+        <ProblemCode
+          isEditing={isEditing}
+          editFields={editFields}
+          setEditFields={setEditFields}
+          question={question}
+        />
+        <ProblemNotes
+          isEditing={isEditing}
+          editFields={editFields}
+          setEditFields={setEditFields}
+          question={question}
+        />
       </div>
     </div>
   );
+
+  // return (
+  //   <div className="border border-red-200">
+  //     {overayDisplaying && (
+  //       <ConfirmationModal
+  //         text={"Do you want to delete this question?"}
+  //         onConfirm={(e) => handleDelete(e, question._id)}
+  //         onCancel={() => setOverlayDisplaying(false)}
+  //         operation="DELETE"
+  //         isOperationPerforming={isDeleting}
+  //       />
+  //     )}
+  //     <div className="">
+  //       <BackBtn className="" />
+  //       <div className="max-w-4xl mx-auto py-10 px-4 text-white border-white border">
+  //         <div className="mb-6 flex justify-between items-center">
+  //           <div className="flex items-center gap-3 flex-wrap">
+  //             <div className="flex flex-col">
+  //               <ProblemTitle
+  //                 isEditing={isEditing}
+  //                 editFields={editFields}
+  //                 setEditFields={setEditFields}
+  //                 question={question}
+  //               />
+
+  //               <LastRevisedAt lastRevisedAt={lastRevisedAt} />
+  //             </div>
+  //           </div>
+
+  //           <ProblemDetailsUpdateButtons
+  //             editFields={editFields}
+  //             setQuestion={setQuestion}
+  //             setIsEditing={setIsEditing}
+  //             setError={setError}
+  //             setLastRevisedAt={setLastRevisedAt}
+  //             lastRevisedAt={lastRevisedAt}
+  //             setOverlayDisplaying={setOverlayDisplaying}
+  //             isEditing={isEditing}
+  //             id={id}
+  //             questions={questions}
+  //             setQuestions={setQuestions}
+  //           />
+  //         </div>
+
+  //         {(question.tags || question.difficulty) && (
+  //           <div className="mb-10 flex items-center gap-10 ">
+  //             <ProblemDifficulty
+  //               isEditing={isEditing}
+  //               editFields={editFields}
+  //               setEditFields={setEditFields}
+  //               question={question}
+  //             />
+
+  //             <ProblemTag
+  //               isEditing={isEditing}
+  //               editFields={editFields}
+  //               setEditFields={setEditFields}
+  //               question={question}
+  //             />
+  //           </div>
+  //         )}
+
+  //         {
+  //           <ProblemStatement
+  //             isEditing={isEditing}
+  //             editFields={editFields}
+  //             setEditFields={setEditFields}
+  //             question={question}
+  //           />
+  //         }
+
+  //         <ProblemLink
+  //           isEditing={isEditing}
+  //           editFields={editFields}
+  //           setEditFields={setEditFields}
+  //         />
+
+  //         <ProblemCode
+  //           isEditing={isEditing}
+  //           editFields={editFields}
+  //           setEditFields={setEditFields}
+  //           question={question}
+  //         />
+
+  //         <ProblemAlgo
+  //           isEditing={isEditing}
+  //           editFields={editFields}
+  //           setEditFields={setEditFields}
+  //           question={question}
+  //         />
+
+  //         <ProblemNotes
+  //           isEditing={isEditing}
+  //           editFields={editFields}
+  //           setEditFields={setEditFields}
+  //           question={question}
+  //         />
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
 }
