@@ -2,6 +2,7 @@ import { FiSearch } from "react-icons/fi";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import QuestionTitle from "./QuestionTitle";
+import { RiRefreshLine } from "react-icons/ri";
 
 export default function QuestionList({ questions, setQuestions }) {
   const [isQuestionLoading, setIsQuestionLoading] = useState(false);
@@ -10,28 +11,45 @@ export default function QuestionList({ questions, setQuestions }) {
   const API_URL = import.meta.env.VITE_API_URL;
 
   function handleClick(e, id) {
-    navigate(`/questions/${id}`,{state:{question:questions.find(ques=>ques._id===id)}});
+    navigate(`/questions/${id}`, {
+      state: { question: questions.find((ques) => ques._id === id) },
+    });
+  }
+  function handleQuestionListRefresh() {
+    localStorage.removeItem("questions");
+    getQuestions(true);
+  }
+
+  async function getQuestions(forceRefresh = false) {
+    if (!forceRefresh) {
+      const cachedQuestions = JSON.parse(localStorage.getItem("questions"));
+      if (cachedQuestions && cachedQuestions.length > 0) {
+        setQuestions(cachedQuestions);
+        return;
+      }
+      if (questions && questions.length > 0) return;
+    }
+
+    setIsQuestionLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/questions`, {
+        headers: {
+          Authorization: `${localStorage.getItem("token")}`,
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+      setQuestions(data.data);
+      // saving the questions array to local storage for faster access
+      localStorage.setItem("questions", JSON.stringify(data.data));
+    } catch (error) {
+      console.error("Failed to fetch questions:", error);
+    } finally {
+      setIsQuestionLoading(false);
+    }
   }
 
   useEffect(() => {
-    async function getQuestions() {
-      if (questions && questions.length > 0) return;
-      setIsQuestionLoading(true);
-      try {
-        const res = await fetch(`${API_URL}/api/questions`, {
-          headers: {
-            Authorization: `${localStorage.getItem("token")}`,
-          },
-        });
-        const data = await res.json();
-        setQuestions(data.data);
-      } catch (error) {
-        console.error("Failed to fetch questions:", error);
-      } finally {
-        setIsQuestionLoading(false);
-      }
-    }
-
     getQuestions();
   }, [API_URL]);
 
@@ -71,14 +89,21 @@ export default function QuestionList({ questions, setQuestions }) {
         </>
       ) : (
         <>
-          <div className="flex w-max items-center gap-2 border-gray-700 border-2 py-1.5 px-4 rounded-md text-white mb-4">
-            <FiSearch />
-            <input
-              type="text"
-              placeholder="Search questions..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="outline-none bg-transparent text-white placeholder-gray-400"
+          <div className="flex gap-3 items-center mb-4">
+            <div className="flex w-max items-center gap-2 border-gray-700 border-2 py-1.5 px-4 rounded-md text-white">
+              <FiSearch />
+              <input
+                type="text"
+                placeholder="Search questions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="outline-none bg-transparent text-white placeholder-gray-400"
+              />
+            </div>
+
+            <RiRefreshLine
+              className="text-xl text-amber-700 hover:text-amber-600 cursor-pointer"
+              onClick={() => handleQuestionListRefresh()}
             />
           </div>
 

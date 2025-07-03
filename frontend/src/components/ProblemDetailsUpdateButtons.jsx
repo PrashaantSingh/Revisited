@@ -22,14 +22,17 @@ export default function ProblemDetailsUpdateButtons({
 
   async function handleSaveEdit() {
     const previousQuestion = questions.find((ques) => ques._id === id);
+    if (!previousQuestion) return;
 
     const updatedQuestion = { ...previousQuestion, ...editFields };
     setQuestion(updatedQuestion);
-
-    setQuestions((prev) =>
-      prev.map((ques) => (ques._id === id ? updatedQuestion : ques))
-    );
-    setQuestion(updatedQuestion);
+    setQuestions((prev) => {
+      const updated = prev.map((ques) =>
+        ques._id === id ? updatedQuestion : ques
+      );
+      localStorage.setItem("questions", JSON.stringify(updated));
+      return updated;
+    });
     setIsEditing(false);
 
     try {
@@ -43,13 +46,18 @@ export default function ProblemDetailsUpdateButtons({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+
+      if (!res.ok) throw new Error(data.message || "Failed to update");
     } catch (err) {
-      setQuestions((prev) =>
-        prev.map((ques) => (ques._id === id ? previousQuestion : ques))
-      );
+      setQuestions((prev) => {
+        const rolledBack = prev.map((ques) =>
+          ques._id === id ? previousQuestion : ques
+        );
+        localStorage.setItem("questions", JSON.stringify(rolledBack));
+        return rolledBack;
+      });
       setQuestion(previousQuestion);
-      setError(err.message);
+      setError(err.message || "Something went wrong.");
     } finally {
       setIsEditing(false);
     }
@@ -57,10 +65,18 @@ export default function ProblemDetailsUpdateButtons({
 
   async function handleVisited(id) {
     setVisited(true);
+
     const prevRevisedAt = lastRevisedAt;
     const newRevisedAt = new Date().toISOString();
-
     setLastRevisedAt(formatDate(newRevisedAt));
+
+    setQuestions((prev) => {
+      const updated = prev.map((q) =>
+        q._id === id ? { ...q, lastRevisedAt: newRevisedAt } : q
+      );
+      localStorage.setItem("questions", JSON.stringify(updated));
+      return updated;
+    });
 
     try {
       const res = await fetch(`${API_URL}/api/questions/${id}`, {
@@ -73,10 +89,18 @@ export default function ProblemDetailsUpdateButtons({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
+      if (!res.ok) throw new Error(data.message || "Failed to update");
     } catch (err) {
       setLastRevisedAt(prevRevisedAt);
-      console.error(err.message);
+      setQuestions((prev) => {
+        const rolledBack = prev.map((q) =>
+          q._id === id ? { ...q, lastRevisedAt: prevRevisedAt } : q
+        );
+        localStorage.setItem("questions", JSON.stringify(rolledBack));
+        return rolledBack;
+      });
+
+      console.error("Failed to update revision date:", err.message);
     } finally {
       setVisited(false);
     }

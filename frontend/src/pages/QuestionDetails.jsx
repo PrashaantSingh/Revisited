@@ -41,12 +41,6 @@ export default function QuestionDetails({ setQuestions, questions }) {
     link: "",
   });
 
-  //
-  console.log(question);
-  console.log(editFields);
-
-  //
-
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
@@ -95,7 +89,9 @@ export default function QuestionDetails({ setQuestions, questions }) {
 
   async function handleDelete(e, id) {
     const prevQuestions = [...questions];
-    setQuestions((prev) => prev.filter((ques) => ques._id !== id));
+    const filtered = prevQuestions.filter((ques) => ques._id !== id);
+    setQuestions(filtered);
+    localStorage.setItem("questions", JSON.stringify(filtered));
     navigate("/");
 
     try {
@@ -116,7 +112,10 @@ export default function QuestionDetails({ setQuestions, questions }) {
       }
     } catch (error) {
       console.error("Delete failed, restoring UI:", error);
+
       setQuestions(prevQuestions);
+      localStorage.setItem("questions", JSON.stringify(prevQuestions));
+
       alert("Failed to delete. Try again.");
     } finally {
       setIsDeleting(false);
