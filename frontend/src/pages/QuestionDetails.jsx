@@ -41,6 +41,12 @@ export default function QuestionDetails({ setQuestions, questions }) {
     link: "",
   });
 
+  //
+  console.log(question);
+  console.log(editFields);
+
+  //
+
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
@@ -87,7 +93,6 @@ export default function QuestionDetails({ setQuestions, questions }) {
     }
   }, [question]);
 
-
   async function handleDelete(e, id) {
     const prevQuestions = [...questions];
     setQuestions((prev) => prev.filter((ques) => ques._id !== id));
@@ -109,8 +114,6 @@ export default function QuestionDetails({ setQuestions, questions }) {
       if (!data.success) {
         throw new Error("Could not delete!");
       }
-
-      // navigate("/");
     } catch (error) {
       console.error("Delete failed, restoring UI:", error);
       setQuestions(prevQuestions);
@@ -119,29 +122,6 @@ export default function QuestionDetails({ setQuestions, questions }) {
       setIsDeleting(false);
     }
   }
-  
-
-  // async function handleDelete(e, id) {
-  //   try {
-  //     setIsDeleting(true);
-  //     e.target.innerText = "Deleting..";
-  //     const res = await fetch(`${API_URL}/api/questions/${id}`, {
-  //       method: "DELETE",
-  //       headers: {
-  //         Authorization: localStorage.getItem("token"),
-  //       },
-  //     });
-  //     const data = await res.json();
-  //     if (data.success) {
-  //       setQuestions((prev) => prev.filter((ques) => ques._id !== id));
-  //       navigate("/");
-  //     } else throw new Error("could not delete!");
-  //   } catch (error) {
-  //     console.error(error);
-  //   } finally {
-  //     setIsDeleting(false);
-  //   }
-  // }
 
   if (error) {
     return <p className="text-red-500 text-center mt-10">{error}</p>;
@@ -179,7 +159,9 @@ export default function QuestionDetails({ setQuestions, questions }) {
 
           <ProblemDetailsUpdateButtons
             editFields={editFields}
+            setEditFields={setEditFields}
             setQuestion={setQuestion}
+            question={question}
             setIsEditing={setIsEditing}
             setError={setError}
             setLastRevisedAt={setLastRevisedAt}
@@ -231,6 +213,7 @@ export default function QuestionDetails({ setQuestions, questions }) {
           editFields={editFields}
           setEditFields={setEditFields}
           question={question}
+          setQuestion={setQuestion}
         />
         <ProblemNotes
           isEditing={isEditing}

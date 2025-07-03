@@ -4,7 +4,9 @@ import formatDate from "../utilities/formatDate";
 
 export default function ProblemDetailsUpdateButtons({
   editFields,
+  setEditFields,
   setQuestion,
+  question,
   setIsEditing,
   setError,
   setLastRevisedAt,
@@ -22,6 +24,7 @@ export default function ProblemDetailsUpdateButtons({
     const previousQuestion = questions.find((ques) => ques._id === id);
 
     const updatedQuestion = { ...previousQuestion, ...editFields };
+    setQuestion(updatedQuestion);
 
     setQuestions((prev) =>
       prev.map((ques) => (ques._id === id ? updatedQuestion : ques))
@@ -79,29 +82,6 @@ export default function ProblemDetailsUpdateButtons({
     }
   }
 
-  // async function handleVisited(id) {
-  //   setVisited(true);
-  //   try {
-  //     const res = await fetch(`${API_URL}/api/questions/${id}`, {
-  //       method: "PATCH",
-  //       headers: {
-  //         "Content-type": "application/json",
-  //         Authorization: localStorage.getItem("token"),
-  //       },
-  //       body: JSON.stringify({ lastRevisedAt: new Date().toISOString() }),
-  //     });
-
-  //     const data = await res.json();
-
-  //     const lastRevised = formatDate(data.question.lastRevisedAt);
-  //     setLastRevisedAt(lastRevised);
-  //   } catch (error) {
-  //     console.error(error?.message || "Couldn't marked visited");
-  //   } finally {
-  //     setTimeout(() => setVisited(false), 1500);
-  //   }
-  // }
-
   return (
     <>
       <div className="self-center flex gap-2">
@@ -140,7 +120,11 @@ export default function ProblemDetailsUpdateButtons({
             </button>
             <button
               className="text-sm px-4 py-2 rounded-full bg-red-600 hover:bg-red-500 text-white cursor-pointer"
-              onClick={() => setIsEditing(false)}
+              onClick={() => {
+                setIsEditing(false);
+                setQuestion(question);
+                setEditFields(question);
+              }}
             >
               Cancel
             </button>

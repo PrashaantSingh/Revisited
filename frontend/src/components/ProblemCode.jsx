@@ -1,10 +1,20 @@
 import CodeBlock from "./CodeBlock";
+import { js_beautify } from "js-beautify";
+
 export default function ProblemCode({
   isEditing,
   editFields,
   setEditFields,
   question,
 }) {
+
+
+  const formattedCode = js_beautify(question.code, {
+    indent_size: 2,
+    indent_with_tabs: false,
+    brace_style: "collapse",
+  });
+
   if (!isEditing && (!question.code || question.code.trim() === ""))
     return null;
 
@@ -22,7 +32,7 @@ export default function ProblemCode({
             rows={8}
           />
         ) : (
-          <CodeBlock code={question.code} language="java" />
+          <CodeBlock code={formattedCode} language="java" />
         )}
       </div>
     </div>
