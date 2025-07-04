@@ -1,14 +1,10 @@
 import { BiLink } from "react-icons/bi";
 import { PiBrainBold } from "react-icons/pi";
 export default function QuestionTitle({ question, clickHandler }) {
-  const { title, difficulty, link, lastRevisedAt } = question;
-  const daysAgo = getDaysAgo(lastRevisedAt);
-  const colorClass =
-    {
-      hard: "text-red-500",
-      medium: "text-yellow-500",
-      easy: "text-green-500",
-    }[difficulty.toLowerCase()] || "";
+  const { title, link, nextReviewDate, lastRevisedAt } = question;
+
+  // Dynamic color logic based on percentage of interval passed
+  const colorClass = getDynamicColor(lastRevisedAt, nextReviewDate);
 
   return (
     <div
@@ -28,34 +24,24 @@ export default function QuestionTitle({ question, clickHandler }) {
         </a>
       </div>
       <div className="px-2 py-1">
-        <PiBrainBold
-          className={`text-xl ${
-            daysAgo <= 2
-              ? "text-green-500"
-              : daysAgo <= 4
-              ? "text-yellow-600"
-              : daysAgo <= 7
-              ? "text-red-600"
-              : "text-gray-500"
-          }`}
-        />
-
-        {/* <p className={`${colorClass} font-semibold text-sm leading-none px-2 py-1 rounded-md`}>
-          {difficulty.length > 4
-            ? capitalize(difficulty.slice(0, 3) + ".")
-            : capitalize(difficulty)}
-        </p> */}
+        <PiBrainBold className={`text-xl ${colorClass}`} />
       </div>
     </div>
   );
 }
 
-function getDaysAgo(dateString) {
+function getDynamicColor(lastRevisedAt, nextReviewDate) {
+  if (!lastRevisedAt || !nextReviewDate) return "text-gray-500";
   const now = new Date();
-  const revisedDate = new Date(dateString);
+  const last = new Date(lastRevisedAt);
+  const next = new Date(nextReviewDate);
 
-  const timeDiff = now - revisedDate;
-  const daysAgo = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+  const intervalMs = Math.max(60 * 1000, next - last); // at least 1 minute
+  const elapsedMs = now - last;
+  const progress = Math.max(0, elapsedMs / intervalMs);
 
-  return daysAgo;
+  if (progress < 0.5) return "text-green-500"; // 0-50% of interval (green)
+  if (progress < 0.8) return "text-yellow-600"; // 50-80% of interval (yellow)
+  if (progress < 1) return "text-red-600"; // 80-100% of interval (red)
+  return "text-gray-500"; // 100%+ of interval (gray)
 }

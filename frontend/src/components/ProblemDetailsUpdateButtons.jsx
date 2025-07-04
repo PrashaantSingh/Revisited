@@ -1,7 +1,4 @@
-import { useState } from "react";
 import { MdDelete } from "react-icons/md";
-import formatDate from "../utilities/formatDate";
-
 export default function ProblemDetailsUpdateButtons({
   editFields,
   setEditFields,
@@ -9,18 +6,18 @@ export default function ProblemDetailsUpdateButtons({
   question,
   setIsEditing,
   setError,
-  setLastRevisedAt,
-  lastRevisedAt,
   isEditing,
   id,
   setOverlayDisplaying,
   setQuestions,
   questions,
+  setIsMarkingVisited,
+  visited,
 }) {
-  const [visited, setVisited] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
 
   async function handleSaveEdit() {
+    console.log("saving...");
     const previousQuestion = questions.find((ques) => ques._id === id);
     if (!previousQuestion) return;
 
@@ -37,6 +34,7 @@ export default function ProblemDetailsUpdateButtons({
 
     try {
       const res = await fetch(`${API_URL}/api/questions/${id}`, {
+        // const res = await fetch(`http://localhost:3000/api/questions/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -63,77 +61,35 @@ export default function ProblemDetailsUpdateButtons({
     }
   }
 
-  async function handleVisited(id) {
-    setVisited(true);
-
-    const prevRevisedAt = lastRevisedAt;
-    const newRevisedAt = new Date().toISOString();
-    setLastRevisedAt(formatDate(newRevisedAt));
-
-    setQuestions((prev) => {
-      const updated = prev.map((q) =>
-        q._id === id ? { ...q, lastRevisedAt: newRevisedAt } : q
-      );
-      localStorage.setItem("questions", JSON.stringify(updated));
-      return updated;
-    });
-
-    try {
-      const res = await fetch(`${API_URL}/api/questions/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("token"),
-        },
-        body: JSON.stringify({ lastRevisedAt: newRevisedAt }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update");
-    } catch (err) {
-      setLastRevisedAt(prevRevisedAt);
-      setQuestions((prev) => {
-        const rolledBack = prev.map((q) =>
-          q._id === id ? { ...q, lastRevisedAt: prevRevisedAt } : q
-        );
-        localStorage.setItem("questions", JSON.stringify(rolledBack));
-        return rolledBack;
-      });
-
-      console.error("Failed to update revision date:", err.message);
-    } finally {
-      setVisited(false);
-    }
-  }
-
   return (
     <>
-      <div className="self-center flex gap-2">
-        <button
-          onClick={() => handleVisited(id)}
-          disabled={visited}
-          className={`text-sm px-4 py-2 w-30 rounded-full transition-all duration-200 ease-in
-         ${
-           visited
-             ? "bg-green-600 text-white cursor-not-allowed"
-             : "bg-light-dark text-green-500 cursor-pointer"
-         }`}
-        >
-          {visited ? "✓ Visited" : "Mark Visited"}
-        </button>
+      <div className="self-center flex gap-2 items-center">
         {!isEditing ? (
-          <div className="flex gap-2 items-center">
+          <>
+            <MdDelete
+              className="text-2xl text-red-500 cursor-pointer"
+              onClick={() => setOverlayDisplaying(true)}
+            />
             <button
               className="text-sm px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-500 text-white cursor-pointer"
               onClick={() => setIsEditing(true)}
             >
               Edit
             </button>
-            <MdDelete
-              className="text-2xl text-red-500 cursor-pointer"
-              onClick={() => setOverlayDisplaying(true)}
-            />
-          </div>
+            <button
+              // onClick={() => handleVisited(id)}
+              onClick={() => setIsMarkingVisited(true)}
+              disabled={visited}
+              className={`text-sm px-4 py-2 w-30 rounded-full transition-all duration-200 ease-in
+                ${
+                  visited
+                    ? "bg-green-600 text-white cursor-not-allowed"
+                    : "bg-light-dark text-green-500 cursor-pointer"
+                }`}
+            >
+              {visited ? "✓ Visited" : "Mark Visited"}
+            </button>
+          </>
         ) : (
           <>
             <button

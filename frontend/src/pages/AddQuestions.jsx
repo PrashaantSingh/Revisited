@@ -50,6 +50,7 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
       const API_URL = import.meta.env.VITE_API_URL;
 
       const res = await fetch(`${API_URL}/api/questions/add`, {
+      // const res = await fetch(`http://localhost:3000/api/questions/add`, {
         method: "POST",
         headers: {
           "Content-type": "application/json",
@@ -65,6 +66,7 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
           const updated = prev.map((q) =>
             q._id === tempId ? data.question : q
           );
+          console.log(updated)
           localStorage.setItem("questions", JSON.stringify(updated));
           return updated;
         });
@@ -200,7 +202,7 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
               name="difficulty"
               value={form.difficulty}
               onChange={handleChange}
-              className="w-full bg-light-dark rounded-md p-2 focus:outline-none focus:border-amber-600"
+              className="w-full bg-light-dark rounded-md p-2 focus:outline-none focus:border-amber-600 cursor-pointer"
               required
             >
               <option value="easy">Easy</option>
@@ -213,7 +215,7 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
             <button
               type="submit"
               disabled={isAdding}
-              className={`bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-md shadow`}
+              className={`bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-md shadow cursor-pointer`}
             >
               {isAdding ? "Adding.." : "Add Question"}
             </button>

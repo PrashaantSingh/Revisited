@@ -22,6 +22,8 @@ const Login = ({ setUser }) => {
     setIsLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/user/signin`, {
+
+      // const res = await fetch(`http://localhost:3000/api/user/signin`, {
         method: "POST",
         credentials: "include",
         headers: {

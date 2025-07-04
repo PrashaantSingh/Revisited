@@ -7,6 +7,7 @@ export default function ConfirmationModal({
   onConfirm,
   operation,
   isOperationPerforming,
+  onClose,
 }) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -16,7 +17,7 @@ export default function ConfirmationModal({
   }, []);
 
   return (
-    <BackdropOverlay>
+    <BackdropOverlay onClose={onClose}>
       <div className="relative bg-light-dark px-6 py-8 rounded-2xl shadow-xl w-[90%] max-w-md text-white z-40">
         <h2 className="text-xl font-semibold mb-6 text-center">{text}</h2>
         <div className="flex justify-center gap-5">

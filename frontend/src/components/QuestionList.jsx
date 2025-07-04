@@ -33,6 +33,7 @@ export default function QuestionList({ questions, setQuestions }) {
     setIsQuestionLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/questions`, {
+        // const res = await fetch(`http://localhost:3000/api/questions`, {
         headers: {
           Authorization: `${localStorage.getItem("token")}`,
         },
@@ -107,13 +108,17 @@ export default function QuestionList({ questions, setQuestions }) {
             />
           </div>
 
-          {filteredQuestions.map((ques) => (
-            <QuestionTitle
-              key={ques._id}
-              question={ques}
-              clickHandler={(e) => handleClick(e, ques._id)}
-            />
-          ))}
+          {filteredQuestions
+            .sort(
+              (a, b) => new Date(a.nextReviewDate) - new Date(b.nextReviewDate)
+            )
+            .map((ques) => (
+              <QuestionTitle
+                key={ques._id}
+                question={ques}
+                clickHandler={(e) => handleClick(e, ques._id)}
+              />
+            ))}
         </>
       )}
     </div>
