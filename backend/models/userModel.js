@@ -29,6 +29,8 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     lastOtpSentAt: { type: Date },
+    lastActiveAt: { type: Date, default: null },
+    streak: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

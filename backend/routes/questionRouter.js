@@ -56,7 +56,7 @@ router.post("/add", authorize, async (req, res) => {
 router.get("/", authorize, async (req, res) => {
   try {
     const questions = await Question.find({ user: req.user._id }).sort({
-      lastRevisedAt: 1,
+      nextReviewDate: 1,
     });
     return res.status(200).json({
       success: true,
@@ -91,73 +91,10 @@ router.get("/:id", authorize, async (req, res) => {
   }
 });
 
-// PUT /api/questions/:id
-
-// router.patch("/:id", authorize, async (req, res) => {
-//   const id = req.params.id;
-//   const newLastRevisedAt = req.body.lastRevisedAt;
-
-//   try {
-//     // First, find the question to check ownership
-//     const question = await Question.findById(id);
-
-//     if (!question) {
-//       return res.status(404).json({ message: "Question not found" });
-//     }
-
-//     // Check if the question belongs to the logged-in user
-//     if (question.user.toString() !== req.user._id.toString()) {
-//       return res
-//         .status(403)
-//         .json({ message: "Unauthorized to update this question" });
-//     }
-
-//     // Proceed to update if authorized
-//     question.lastRevisedAt = newLastRevisedAt;
-//     const updatedQuestion = await question.save();
-
-//     return res.status(200).json({
-//       success: true,
-//       lastRevisedAt: updatedQuestion.lastRevisedAt,
-//     });
-//   } catch (error) {
-//     console.error("PATCH /:id error:", error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
-// router.patch("/:id",authorize, async (req, res) => {
-//   const id = req.params.id;
-//   const newLastRevisedAt = req.body.lastRevisedAt;
-
-//   try {
-//     const updatedQuestion = await Question.findByIdAndUpdate(
-//       id,
-//       { lastRevisedAt: newLastRevisedAt },
-//       { new: true }
-//     );
-
-//     res.status(200).json({
-//       success: true,
-//       lastRevisedAt: updatedQuestion.lastRevisedAt,
-//     });
-
-//     if (!updatedQuestion) {
-//       return res.status(404).json({ message: "Question not found" });
-//     }
-
-//     res.status(200).json(updatedQuestion);
-//   } catch (error) {
-//     console.error("PATCH /:id error:", error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
 router.patch("/:id", authorize, async (req, res) => {
   const id = req.params.id;
 
   try {
-    // Find the question and check ownership
     const question = await Question.findById(id);
 
     if (!question) {
@@ -168,6 +105,16 @@ router.patch("/:id", authorize, async (req, res) => {
       return res
         .status(403)
         .json({ message: "Unauthorized to update this question" });
+    }
+
+    if (req.body.sm2Result !== undefined) {
+      const { interval, repetitions, easinessFactor, nextReviewDate } =
+        req.body.sm2Result;
+
+      question.interval = interval;
+      question.repetitions = repetitions;
+      question.easinessFactor = easinessFactor;
+      question.nextReviewDate = nextReviewDate;
     }
 
     if (req.body.lastRevisedAt !== undefined) {

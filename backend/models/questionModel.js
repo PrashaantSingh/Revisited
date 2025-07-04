@@ -49,6 +49,13 @@ const questionSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    interval: { type: Number, default: 2 },
+    repetitions: { type: Number, default: 1 },
+    easinessFactor: { type: Number, default: 2.5 },
+    nextReviewDate: {
+      type: Date,
+      default: () => new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+    },
   },
   { timestamps: true }
 );
