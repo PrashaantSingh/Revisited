@@ -30,10 +30,11 @@ function App() {
       if (localUser) {
         setUser(JSON.parse(localUser));
         setIsLoading(false);
+        return;
       }
 
       try {
-        if (!localUser) setIsLoading(true);
+        setIsLoading(true);
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/user/me`, {
           // const res = await fetch(` http://localhost:3000/api/user/me`, {
