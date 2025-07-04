@@ -25,7 +25,7 @@ export default function Home({
   return (
     <div className="min-h-screen">
       {isLoggingOut && (
-        <ConfirmationModal
+        <ConfirmationModal onClose={()=>setIsLoggingOut(false)}
           text={"Do you want to Log out?"}
           onConfirm={handleLogout}
           onCancel={() => setIsLoggingOut(false)}

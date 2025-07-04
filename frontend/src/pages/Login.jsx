@@ -22,8 +22,7 @@ const Login = ({ setUser }) => {
     setIsLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/user/signin`, {
-
-      // const res = await fetch(`http://localhost:3000/api/user/signin`, {
+        // const res = await fetch(`http://localhost:3000/api/user/signin`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -46,6 +45,7 @@ const Login = ({ setUser }) => {
         throw new Error(data.message);
       }
       localStorage.setItem("token", `Bearer ${data.token}`);
+      localStorage.setItem("user", JSON.stringify(data.user));
       setUser(data.user);
       navigate("/");
     } catch (error) {

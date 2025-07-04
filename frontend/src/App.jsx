@@ -23,10 +23,17 @@ function App() {
   useEffect(() => {
     async function getUser() {
       const token = localStorage.getItem("token");
-      // if(token==undefined||token==null)setIsLoading(false);
+      const localUser = localStorage.getItem("user");
+
       if (!token) return;
+
+      if (localUser) {
+        setUser(JSON.parse(localUser));
+        setIsLoading(false);
+      }
+
       try {
-        setIsLoading(true);
+        if (!localUser) setIsLoading(true);
         const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/api/user/me`, {
           // const res = await fetch(` http://localhost:3000/api/user/me`, {
@@ -39,6 +46,10 @@ function App() {
 
         const data = await res.json();
         setUser(data.user);
+        const localUser = localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
       } catch (error) {
         setError(error.message);
       } finally {

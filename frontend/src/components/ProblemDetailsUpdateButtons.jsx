@@ -17,7 +17,6 @@ export default function ProblemDetailsUpdateButtons({
   const API_URL = import.meta.env.VITE_API_URL;
 
   async function handleSaveEdit() {
-    console.log("saving...");
     const previousQuestion = questions.find((ques) => ques._id === id);
     if (!previousQuestion) return;
 

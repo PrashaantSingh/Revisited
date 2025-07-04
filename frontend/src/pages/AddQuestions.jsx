@@ -50,7 +50,7 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
       const API_URL = import.meta.env.VITE_API_URL;
 
       const res = await fetch(`${API_URL}/api/questions/add`, {
-      // const res = await fetch(`http://localhost:3000/api/questions/add`, {
+        // const res = await fetch(`http://localhost:3000/api/questions/add`, {
         method: "POST",
         headers: {
           "Content-type": "application/json",
@@ -66,7 +66,6 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
           const updated = prev.map((q) =>
             q._id === tempId ? data.question : q
           );
-          console.log(updated)
           localStorage.setItem("questions", JSON.stringify(updated));
           return updated;
         });
@@ -81,7 +80,6 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
         localStorage.setItem("questions", JSON.stringify(updated));
         return updated;
       });
-
       alert("Failed to add question. Please try again.");
     } finally {
       setIsAdding(false);
