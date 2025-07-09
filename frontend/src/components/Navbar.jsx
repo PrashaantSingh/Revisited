@@ -35,8 +35,13 @@ export default function Navbar({
           </li>
         )}
         {user && (
-          <li className="bg-amber-600 hover:bg-amber-500 px-4 py-1.5 rounded-full cursor-pointer">
-            <NavLink to="/addQuestionsForm">Add notes</NavLink>
+          <li>
+            <NavLink
+              className="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-full cursor-pointer"
+              to="/addQuestionsForm"
+            >
+              Add notes
+            </NavLink>
           </li>
         )}
       </ul>

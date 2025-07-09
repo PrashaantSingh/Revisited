@@ -35,7 +35,7 @@ export default function CodeBlock({ code, language = "java" }) {
         showLineNumbers
         customStyle={{ fontSize: "1rem", borderRadius: "8px" }}
       >
-        {code}
+        {String(code)||""}
       </SyntaxHighlighter>
     </div>
   );

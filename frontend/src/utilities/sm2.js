@@ -2,7 +2,6 @@ export default function sm2(
   { interval = 1, repetitions = 0, easinessFactor = 2.5 },
   quality
 ) {
-  // Validate quality input
   if (quality < 0 || quality > 5) {
     throw new Error("Quality must be between 0 and 5");
   }
@@ -14,7 +13,7 @@ export default function sm2(
     repetitions += 1;
 
     if (repetitions === 1) {
-      interval = 1;
+      interval = minInterval; // 🔁 Enforce min interval here
     } else if (repetitions === 2) {
       interval = 6;
     } else {
@@ -26,7 +25,7 @@ export default function sm2(
             ? Math.round(interval * 0.8)
             : Math.max(minInterval, Math.round(interval));
       } else if (quality === 4) {
-        interval = Math.round(interval * 0.9);
+        interval = Math.max(minInterval, Math.round(interval * 0.9));
       }
     }
 
