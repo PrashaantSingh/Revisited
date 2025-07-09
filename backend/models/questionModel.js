@@ -56,6 +56,7 @@ const questionSchema = new mongoose.Schema(
       type: Date,
       default: () => new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
     },
+    revisedCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

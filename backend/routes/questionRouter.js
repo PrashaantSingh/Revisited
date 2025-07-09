@@ -115,6 +115,7 @@ router.patch("/:id", authorize, async (req, res) => {
       question.repetitions = repetitions;
       question.easinessFactor = easinessFactor;
       question.nextReviewDate = nextReviewDate;
+      question.revisedCount += 1;
     }
 
     if (req.body.lastRevisedAt !== undefined) {
