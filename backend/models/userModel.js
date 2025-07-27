@@ -31,6 +31,19 @@ const userSchema = new mongoose.Schema(
     lastOtpSentAt: { type: Date },
     lastActiveAt: { type: Date, default: null },
     streak: { type: Number, default: 0 },
+    maxStreak: { type: Number, default: 0 },
+    lastStreakUpdateAt: {
+      type: Date,
+      default: Date.now,
+    },
+    totalActiveDays: {
+      type: Number,
+      default: 0,
+    },
+    totalQuestions: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import BackBtn from "../components/BackBtn";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,8 @@ import ProblemDetailsUpdateButtons from "../components/ProblemDetailsUpdateButto
 import formatDate from "../utilities/formatDate";
 import BackdropOverlay from "../components/BackdropOverlay";
 import SM2 from "../utilities/sm2";
+import MarkVisitedButton from "../components/MarkVisitedButton";
+import { AppContext } from "../context/AppContext";
 const recallQualityMap = {
   forgot: 2,
   hard: 3,
@@ -40,7 +42,9 @@ const recallButtons = [
   { label: "Easy", value: "easy", color: "text-white", bg: "bg-green-600" },
 ];
 
-export default function QuestionDetails({ setQuestions, questions }) {
+export default function QuestionDetails() {
+  const { state, setQuestions, setToLocalStorage, setUser, refreshUser } =
+    useContext(AppContext);
   const { id } = useParams();
   const [question, setQuestion] = useState(null);
   const [error, setError] = useState("");
@@ -53,7 +57,7 @@ export default function QuestionDetails({ setQuestions, questions }) {
   const [visited, setVisited] = useState(false);
 
   const navigate = useNavigate();
-
+  const questions = state.questions;
   const [editFields, setEditFields] = useState({
     title: "",
     problemStatement: "",
@@ -83,7 +87,6 @@ export default function QuestionDetails({ setQuestions, questions }) {
       }
       try {
         const res = await fetch(`${API_URL}/api/questions/${id}`, {
-          // const res = await fetch(`http://localhost:3000/api/questions/${id}`, {
           headers: {
             "Content-type": "application/json",
             Authorization: localStorage.getItem("token"),
@@ -92,13 +95,11 @@ export default function QuestionDetails({ setQuestions, questions }) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
         setQuestion(data.question);
-        setQuestions((prev) => {
-          const updated = prev.map((q) =>
-            q._id === data.question._id ? data.question : q
-          );
-          localStorage.setItem("questions", JSON.stringify(updated));
-          return updated;
-        });
+        const updated = questions.map((ques) =>
+          ques._id === data.question._id ? data.question : ques
+        );
+        setQuestions(updated);
+        setToLocalStorage("questions", updated);
         setLastRevisedAt(formatDate(data.question.lastRevisedAt));
       } catch (err) {
         setError(err.message);
@@ -140,17 +141,16 @@ export default function QuestionDetails({ setQuestions, questions }) {
     };
     setQuestion(updatedQuestion);
     setLastRevisedAt(formatDate(newRevisedAt));
-    setQuestions((prev) => {
-      const updated = prev.map((q) => (q._id === id ? updatedQuestion : q));
-      localStorage.setItem("questions", JSON.stringify(updated));
-      return updated;
-    });
+    const updated = questions.map((q) => (q._id === id ? updatedQuestion : q));
+    setQuestions(updated);
+    setToLocalStorage("questions", updated);
+    const currStreak = state.user.streak;
+    setUser({ ...state.user, streak: currStreak + 1 });
 
     setTimeout(() => setVisited(false), 1500);
     setIsMarkingVisited(false);
     try {
       const res = await fetch(`${API_URL}/api/questions/${id}`, {
-        // const res = await fetch(`http://localhost:3000/api/questions/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -167,21 +167,21 @@ export default function QuestionDetails({ setQuestions, questions }) {
 
       if (data.question) {
         setQuestion(data.question);
-        setQuestions((prev) => {
-          const updated = prev.map((q) => (q._id === id ? data.question : q));
-          localStorage.setItem("questions", JSON.stringify(updated));
-          return updated;
-        });
+        const newlyFetched = questions.map((q) =>
+          q._id === id ? data.question : q
+        );
+        setQuestions(newlyFetched);
+        setToLocalStorage("questions", newlyFetched);
+        await refreshUser();
       }
     } catch (err) {
       setLastRevisedAt(prevRevisedAt);
-      setQuestions((prev) => {
-        const rolledBack = prev.map((q) => (q._id === id ? prevQues : q));
-        localStorage.setItem("questions", JSON.stringify(rolledBack));
-        return rolledBack;
-      });
+      const rollback = questions.map((q) => (q._id === id ? prevQues : q));
+      setQuestions(rollback);
+      setToLocalStorage("questions", rollback);
 
       setQuestion(prevQues);
+      setUser({ ...state.user, streak: currStreak });
       console.error("Failed to update revision data:", err.message);
     } finally {
       setVisited(false);
@@ -199,7 +199,7 @@ export default function QuestionDetails({ setQuestions, questions }) {
     const prevQuestions = [...questions];
     const filtered = prevQuestions.filter((ques) => ques._id !== id);
     setQuestions(filtered);
-    localStorage.setItem("questions", JSON.stringify(filtered));
+    setToLocalStorage("questions", filtered);
     navigate("/");
 
     try {
@@ -222,7 +222,7 @@ export default function QuestionDetails({ setQuestions, questions }) {
       console.error("Delete failed, restoring UI:", error);
 
       setQuestions(prevQuestions);
-      localStorage.setItem("questions", JSON.stringify(prevQuestions));
+      setToLocalStorage("questions", prevQuestions);
 
       alert("Failed to delete. Try again.");
     } finally {
@@ -239,8 +239,8 @@ export default function QuestionDetails({ setQuestions, questions }) {
   }
 
   return (
-    <div className="flex justify-center items-start gap-4 px-4 py-10 text-white">
-      <BackBtn />
+    <div className="flex justify-center items-start gap-4 sm:px-4 py-8 sm:py-10 text-white">
+      <BackBtn className="hidden lg:block" />
 
       <div className="max-w-4xl w-full px-4">
         {overlayDisplaying && (
@@ -277,7 +277,8 @@ export default function QuestionDetails({ setQuestions, questions }) {
           </BackdropOverlay>
         )}
 
-        <div className="mb-6 flex justify-between items-start">
+        {/* <div className="mb-8 pb-4 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-5 border-b-light-dark border-b-2"> */}
+        <div className="mb-8 pb-4 flex flex-row justify-between gap-y-6 gap-x-8 items-start border-b-light-dark border-b-2 flex-wrap">
           <div className="flex flex-col gap-1">
             <ProblemTitle
               isEditing={isEditing}
@@ -290,6 +291,10 @@ export default function QuestionDetails({ setQuestions, questions }) {
               nextReviewDate={formatDate(question.nextReviewDate)}
             />
           </div>
+          {/* <MarkVisitedButton
+            visited={visited}
+            setIsMarkingVisited={setIsMarkingVisited}
+          /> */}
 
           <ProblemDetailsUpdateButtons
             editFields={editFields}
@@ -313,23 +318,6 @@ export default function QuestionDetails({ setQuestions, questions }) {
             setVisited={setVisited}
           />
         </div>
-
-        {(question.tags || question.difficulty) && (
-          <div className="mb-10 flex items-center gap-10">
-            <ProblemDifficulty
-              isEditing={isEditing}
-              editFields={editFields}
-              setEditFields={setEditFields}
-              question={question}
-            />
-            <ProblemTag
-              isEditing={isEditing}
-              editFields={editFields}
-              setEditFields={setEditFields}
-              question={question}
-            />
-          </div>
-        )}
 
         <ProblemStatement
           isEditing={isEditing}
@@ -361,6 +349,25 @@ export default function QuestionDetails({ setQuestions, questions }) {
           setEditFields={setEditFields}
           question={question}
         />
+        <div className="bg-light-dark h-0.5 w-full mt-8 mb-6"></div>
+        {(question.tags || question.difficulty) && (
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-10">
+              <ProblemDifficulty
+                isEditing={isEditing}
+                editFields={editFields}
+                setEditFields={setEditFields}
+                question={question}
+              />
+              <ProblemTag
+                isEditing={isEditing}
+                editFields={editFields}
+                setEditFields={setEditFields}
+                question={question}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

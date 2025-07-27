@@ -5,63 +5,23 @@ import Home from "./pages/Home";
 import { Routes, Route, useNavigate, Navigate } from "react-router";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useContext } from "react";
 import OtpVerification from "./pages/OtpVerification.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import ResetOtpVerification from "./pages/ResetOtpVerification.jsx";
 import SetNewPassword from "./pages/SetNewPassword.jsx";
 import PageNotFound from "./components/PageNotFound";
+import { AppContext } from "./context/AppContext.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [questions, setQuestions] = useState([]);
+  const { state, setUser } = useContext(AppContext);
 
   const navigate = useNavigate();
-  useEffect(() => {
-    async function getUser() {
-      const token = localStorage.getItem("token");
-      const localUser = localStorage.getItem("user");
 
-      if (!token) return;
-
-      if (localUser) {
-        setUser(JSON.parse(localUser));
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const API_URL = import.meta.env.VITE_API_URL;
-        const res = await fetch(`${API_URL}/api/user/me`, {
-          // const res = await fetch(` http://localhost:3000/api/user/me`, {
-          method: "GET",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: token,
-          },
-        });
-
-        const data = await res.json();
-        setUser(data.user);
-        const localUser = localStorage.setItem(
-          "user",
-          JSON.stringify(data.user)
-        );
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    getUser();
-  }, []);
   return (
     <>
-      {isLoading ? (
+      {state.isLoading ? (
         <div className="flex justify-center items-center h-screen">
           <h2 className="text-white text-center">Loading...</h2>
         </div>
@@ -69,45 +29,19 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={
-              user ? (
-                <Home
-                  user={user}
-                  error={error}
-                  setError={setError}
-                  setUser={setUser}
-                  questions={questions}
-                  setQuestions={setQuestions}
-                />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
+            element={state.user ? <Home /> : <Navigate to="/login" />}
           />
           <Route
             path="/login"
-            element={!user ? <Login setUser={setUser} /> : <Navigate to="/" />}
+            element={
+              !state.user ? <Login setUser={setUser} /> : <Navigate to="/" />
+            }
           />
           <Route path="/signup" element={<Signup setUser={setUser} />} />
-          <Route
-            path="/addQuestionsForm"
-            element={
-              <AddQuestionForm
-                setQuestions={setQuestions}
-                questions={questions}
-              />
-            }
-          />
+          <Route path="/admin/users" element={<AdminDashboard />} />
+          <Route path="/addQuestionsForm" element={<AddQuestionForm />} />
 
-          <Route
-            path="/questions/:id"
-            element={
-              <QuestionDetails
-                setQuestions={setQuestions}
-                questions={questions}
-              />
-            }
-          />
+          <Route path="/questions/:id" element={<QuestionDetails />} />
           <Route
             path="/user/verification"
             element={

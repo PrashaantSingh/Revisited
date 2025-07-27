@@ -16,15 +16,15 @@ export default function QuestionTitle({ question, clickHandler }) {
       }`}
     >
       <div className={`flex items-center gap-2`}>
-        <div>{title}</div>
+        <p className="text-sm sm:text-[16px]">{title}</p>
         <a href={link} target="_blank" onClick={(e) => e.stopPropagation()}>
           <BiLink
-            className={link ? `text-amber-500 hover:text-amber-600` : "hidden"}
+            className={link ? `text-amber-500 hover:text-amber-600 text-sm sm:text-[16px]` : "hidden"}
           />
         </a>
       </div>
       <div className="px-2 py-1">
-        <PiBrainBold className={`text-xl ${colorClass}`} />
+        <PiBrainBold className={`text-md sm:text-xl ${colorClass}`} />
       </div>
     </div>
   );

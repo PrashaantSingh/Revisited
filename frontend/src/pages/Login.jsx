@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Header from "../components/Header";
 import { useNavigate } from "react-router";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import { AppContext } from "../context/AppContext";
 
-const Login = ({ setUser }) => {
+const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
-
+  const { state, setUser, setIsLoading } = useContext(AppContext);
+  const isLoading = state.isLoading;
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));

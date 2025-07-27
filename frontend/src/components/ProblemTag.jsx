@@ -20,8 +20,8 @@ export default function ProblemTag({isEditing,editFields,setEditFields,question}
         Array.isArray(question.tags) &&
         question.tags.filter((tag) => tag.trim() != "").length > 0 && (
           <span>
-            <div className="flex gap-3 items-center bg-light-dark px-3 py-1.5 rounded-full">
-              <FaTags className="text-lg" />
+            <div className="flex gap-3 items-center bg-light-dark px-3 py-1 rounded-full">
+              <FaTags className="text-xs" />
               <div className="flex flex-wrap gap-2">
                 {question.tags.map((tag, index) => (
                   <span

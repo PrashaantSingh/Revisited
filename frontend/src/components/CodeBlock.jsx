@@ -33,9 +33,13 @@ export default function CodeBlock({ code, language = "java" }) {
         style={tomorrow}
         wrapLongLines
         showLineNumbers
-        customStyle={{ fontSize: "1rem", borderRadius: "8px" }}
+        customStyle={{
+          fontSize: "clamp(14px, 2.5vw, 16px)",
+          borderRadius: "8px",
+        }}
+        className="rounded-md text-2xl"
       >
-        {String(code)||""}
+        {String(code) || ""}
       </SyntaxHighlighter>
     </div>
   );

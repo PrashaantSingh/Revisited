@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router";
+import { AppContext } from "../context/AppContext";
 
-const AddQuestionForm = ({ questions, setQuestions }) => {
+const AddQuestionForm = () => {
   const navigate = useNavigate();
+  const {
+    state,
+    setQuestions,
+    addTempQuestion,
+    replaceTempQuestion,
+    removeTempQuestion,
+    refreshUser,
+    setUser,
+  } = useContext(AppContext);
+
   const [isAdding, setIsAdding] = useState(false);
   const [form, setForm] = useState({
     title: "",
@@ -38,11 +49,9 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
       lastRevisedAt: new Date(),
     };
     const tempQuestion = { ...questionData, _id: tempId, isTemp: true };
-    setQuestions((prev) => {
-      const updated = [...prev, tempQuestion];
-      localStorage.setItem("questions", JSON.stringify(updated));
-      return updated;
-    });
+    const currStreak = state.user.streak;
+    addTempQuestion(tempQuestion);
+    setUser({ ...state.user, streak: currStreak + 1 });
 
     navigate("/");
 
@@ -50,7 +59,6 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
       const API_URL = import.meta.env.VITE_API_URL;
 
       const res = await fetch(`${API_URL}/api/questions/add`, {
-        // const res = await fetch(`http://localhost:3000/api/questions/add`, {
         method: "POST",
         headers: {
           "Content-type": "application/json",
@@ -62,24 +70,15 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
       const data = await res.json();
 
       if (data.success && data.question) {
-        setQuestions((prev) => {
-          const updated = prev.map((q) =>
-            q._id === tempId ? data.question : q
-          );
-          localStorage.setItem("questions", JSON.stringify(updated));
-          return updated;
-        });
+        replaceTempQuestion(tempId, data.question);
+        await refreshUser();
       } else {
         throw new Error(data.message || "Could not add question");
       }
     } catch (error) {
       console.error("Error adding question:", error);
-
-      setQuestions((prev) => {
-        const updated = prev.filter((q) => q._id !== tempId);
-        localStorage.setItem("questions", JSON.stringify(updated));
-        return updated;
-      });
+      removeTempQuestion(tempId);
+      setUser({ ...state.user, streak: currStreak });
       alert("Failed to add question. Please try again.");
     } finally {
       setIsAdding(false);
@@ -159,7 +158,7 @@ const AddQuestionForm = ({ questions, setQuestions }) => {
           </div>
 
           <div>
-            <label className="block font-medium mb-2">Algorithm</label>
+            <label className="block font-medium mb-2">Approach</label>
             <textarea
               name="algorithm"
               value={form.algorithm}

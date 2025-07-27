@@ -13,7 +13,7 @@ export default function sm2(
     repetitions += 1;
 
     if (repetitions === 1) {
-      interval = minInterval; // 🔁 Enforce min interval here
+      interval = minInterval; 
     } else if (repetitions === 2) {
       interval = 6;
     } else {

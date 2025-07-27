@@ -27,7 +27,7 @@ export default function ProblemDifficulty({isEditing,editFields,setEditFields,qu
       ) : (
         question.difficulty && (
           <span
-            className={`inline-block px-3 py-1 rounded-full text-sm ${bgColorClass}`}
+            className={`inline-block px-3 py-1 rounded-full text-xs ${bgColorClass}`}
           >
             {question.difficulty.charAt(0).toUpperCase() +
               question.difficulty.slice(1)}

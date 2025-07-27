@@ -7,58 +7,7 @@ import OTP from "../models/otpModel.js";
 import { sendOtpToUser } from "../utilities/sendOtpToUser.js";
 
 const router = express.Router();
-//SIGNUP
-// router.post("/signup", async (req, res) => {
-//   try {
-//     const { name, email, password, confirmPassword } = req.body || {};
-//     console.log(name, email, password, confirmPassword);
-//     if (!name || !email || !password) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Please provide all the fields.",
-//       });
-//     }
-
-//     if (password !== confirmPassword) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Password and Confirm Password need to be the same.",
-//       });
-//     }
-
-//     let user = await User.findOne({ email });
-//     if (user) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "User already exists.",
-//       });
-//     }
-
-//     user = await User.create({
-//       name,
-//       email,
-//       password,
-//     });
-
-//     const token = generateToken(process.env.JWT_SECRET, user._id);
-
-//     return res.status(201).json({
-//       success: true,
-//       user: {
-//         name: user.name,
-//         email: user.email,
-//         id: user._id,
-//       },
-//       token,
-//     });
-//   } catch (error) {
-//     console.log("Signup error: ", error);
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// });
+//Signup
 
 router.post("/signup", async (req, res) => {
   try {
@@ -161,12 +110,19 @@ router.post("/signin", async (req, res) => {
     }
 
     const token = generateToken(process.env.JWT_SECRET, user._id);
+    user.lastActiveAt = new Date();
+    await user.save();
     return res.status(200).json({
       success: true,
       user: {
         name: user.name,
         email: user.email,
         id: user._id,
+        role: user.role,
+        streak: user.streak,
+        maxStreak: user.maxStreak,
+        totalActiveDays: user.totalActiveDays,
+        totalQuestions: user.totalQuestions,
       },
       token,
     });
@@ -183,12 +139,23 @@ router.post("/signin", async (req, res) => {
 router.get("/me", authorize, async (req, res) => {
   try {
     const user = req.user;
+
+    const now = new Date();
+    const lastUpdate = new Date(user.lastStreakUpdateAt);
+
+    const hoursDiff = Math.abs(now - lastUpdate) / 36e5;
+
+    if (hoursDiff > 24 && user.streak > 0) {
+      user.streak = 0;
+      await user.save();
+    }
+
     return res.status(200).json({
       success: true,
-      user: req.user,
+      user,
     });
   } catch (error) {
-    return res.status(400).json({
+    return res.status(401).json({
       success: false,
       message: "Unauthorized! Access Denied.",
     });
@@ -237,6 +204,7 @@ router.post("/verify-otp", async (req, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
+      role: user.role,
     },
     token,
   });
@@ -298,7 +266,6 @@ router.post("/reset-password", async (req, res) => {
 
 router.post("/send-otp", async (req, res) => {
   const { email, type } = req.body;
-  console.log(email, type);
 
   const subject =
     type === "accountVerification"

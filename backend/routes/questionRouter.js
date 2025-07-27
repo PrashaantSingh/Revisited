@@ -1,7 +1,9 @@
 import express from "express";
 import Question from "../models/questionModel.js";
-import protect from "../middlewares/authorize.js";
 import authorize from "../middlewares/authorize.js";
+import updateStreak from "../middlewares/updateStreak.js";
+import User from "../models/userModel.js";
+
 // import {
 //   getQuestions,
 //   getQuestionById,
@@ -14,7 +16,7 @@ import authorize from "../middlewares/authorize.js";
 const router = express.Router();
 
 // add
-router.post("/add", authorize, async (req, res) => {
+router.post("/add", authorize, updateStreak, async (req, res) => {
   try {
     const {
       title,
@@ -26,6 +28,13 @@ router.post("/add", authorize, async (req, res) => {
       tags,
       link,
     } = req.body;
+
+    const accountOwner = await User.findById(req.user._id);
+
+    if (accountOwner) {
+      accountOwner.totalQuestions = (accountOwner.totalQuestions || 0) + 1;
+      await accountOwner.save();
+    }
 
     const question = new Question({
       title,
@@ -40,14 +49,16 @@ router.post("/add", authorize, async (req, res) => {
     });
 
     await question.save();
+
     return res.status(201).json({
       success: true,
       question,
     });
   } catch (error) {
+    console.error("Error in /add:", error);
     return res.status(400).json({
       success: false,
-      message: "Unable to add the question.Server Error!",
+      message: "Unable to add the question. Server Error!",
     });
   }
 });
@@ -91,7 +102,7 @@ router.get("/:id", authorize, async (req, res) => {
   }
 });
 
-router.patch("/:id", authorize, async (req, res) => {
+router.patch("/:id", authorize, updateStreak, async (req, res) => {
   const id = req.params.id;
 
   try {
@@ -156,29 +167,47 @@ router.patch("/:id", authorize, async (req, res) => {
   }
 });
 
-router.delete("/:id", authorize, async (req, res) => {
-  console.log(req.params);
+// DELETE a question
+router.delete("/:id", authorize, updateStreak, async (req, res) => {
   const quesId = req.params.id;
   const userId = req.user._id;
 
-  if (!userId) throw new Error("Unauthorized");
+  if (!userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
   try {
     const question = await Question.findOneAndDelete({
       _id: quesId,
       user: userId,
     });
-    if (!question) throw new Error("no question with this question id!");
 
-    res.status(200).json({
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        message: "No question found with this ID for the user.",
+      });
+    }
+
+    const accountOwner = await User.findById(userId);
+    if (accountOwner) {
+      accountOwner.totalQuestions = Math.max(
+        0,
+        (accountOwner.totalQuestions || 0) - 1
+      );
+      await accountOwner.save();
+    }
+
+    return res.status(200).json({
       success: true,
       message: "Question Deleted Successfully!",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       quesId,
       userId,
-      message: `DELETE ${quesId}` + error.message,
+      message: `Failed to delete question: ${error.message}`,
     });
   }
 });
