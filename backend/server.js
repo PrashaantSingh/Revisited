@@ -9,43 +9,23 @@ import helmet from "helmet";
 
 dotenv.config();
 const app = express();
+
+// app.use(
+//   cors({
+//     origin:
+//       "http://localhost:5173" ||
+//       process.env.CLIENT_URL ||
+//       "https://revizited.netlify.app",
+//     credentials: true,
+//   })
+// );
+
 app.use(
   cors({
-    origin:
-      "http://localhost:5173" ||
-      process.env.CLIENT_URL ||
-      "https://revizited.netlify.app",
+    origin: "https://revizited.netlify.app",
     credentials: true,
   })
 );
-
-// app.use(
-//   cors({
-//     origin: true,
-//     credentials: true,
-//   })
-// );
-// const allowedOrigins = [
-//   "https://revizited.netlify.app",
-//   "http://localhost:5173",
-//   "http://localhost:5174",
-// ];
-
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         console.error("Blocked by CORS:", origin);
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//   })
-// );
 
 app.use(helmet());
 app.use(express.json());
